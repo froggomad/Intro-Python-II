@@ -134,18 +134,22 @@ def parse(input):
         cmd1 = inputList[0]
         cmd2 = inputList[1]
 
+        if cmd2 == "rock":
+                sys_print("The rock is a lie!!!")
+                return
+
         if cmd1 == "take":
             item = get(cmd2)
             if item:
                 take(item)
-        
-        elif cmd1 == "inspect":
+                return
+        elif cmd1 == "inspect":            
             item = get(cmd2)
             inspect(item)
-
+            return
         if len(inputList) >2:
             sys_print("warning, a maximum of 2 commands (words separated by a space) will be used")
-
+            return
     else:    
         dirs = ["n", "e", "s", "w"]
         
@@ -153,14 +157,14 @@ def parse(input):
             exit(0)
         elif input == "help" or input == "?" or input.lower() == "h":
             print(help())
-
+            return
         elif input in dirs:
             travel(input)
-
+            return
         elif input == "l":
             look()
-        else:
-            sys_print("invalid command")
+            return        
+    sys_print("invalid command")
 
 def look():    
     sys_print("You look around the room and see:")
@@ -185,9 +189,12 @@ def get(item_name):
         return
     return item
 
-def inspect(item):
-    sys_print(f"You are inspecting a(n) {item.name}")
-    print(item.description)
+def inspect(item):    
+    if isinstance(item, Item):
+        sys_print(f"You are inspecting a(n) {item.name}")
+        print(item.description)
+    else:
+        return
 
 def take(item):
     if isinstance(item, LightSource) or isinstance(item, Weapon):
