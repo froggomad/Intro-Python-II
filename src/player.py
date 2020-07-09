@@ -83,7 +83,7 @@ class Player(Mob):
             return self.rightHandItem
 
     def dropItem(self, item):
-        old_attack = self.attack
+        old_attack = self.attack_damage()
         had_light = self.has_light()
 
         thisItem = self.get_from_inventory(item)
@@ -97,14 +97,21 @@ class Player(Mob):
                     self.rightHandItem = self.fist
                 self.current_room.items.append(thisItem)
                 #Attack value changed:
-                if old_attack != self.attack:
+                if old_attack != self.attack_damage():
                     sys_print(f"your attack was {old_attack} and after equipping {item.name} it is now {self.attack}")
             
                 #light changed:
                 if had_light == False and self.has_light() == True:
                     sys_print("You can't see anything!")
-            elif thisItem == self.fist:
-                sys_print("Please, don't try to drop your hands. That would be fatal.")            
+            else:
+                sys_print("Please, don't try to drop your hands. That would be fatal.")
+
+    def fight(self, monster):
+        if isinstance(monster, Monster):
+
+            return
+        else:
+            sys_print(f"If you really thought you could fight a {monster}, you probably also believe in \"the rock\"!")
 
 class Monster(Mob):
     def __init__(self, name, health, experience):
