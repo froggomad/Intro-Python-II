@@ -4,9 +4,9 @@ from player import Player, Monster
 from os import system, name
 
 #Item list
-
 items = {}
-torch = LightSource(0,                            
+
+torch = LightSource(0,
                     "torch",
                     "a crude stick with an oil soaked rag at its tip",
                     "a torch lies on the floor next to it, hastily discarded.",
@@ -19,38 +19,51 @@ items[t] = torch
 brokenChest = Item(1,
             "chest",
             "its lock clearly having been picked by an adventurer before you, and it's contents emptied - there's nothing you can do with this.",
-            "a battered wooden chest sits in the corner",            
+            "a battered wooden chest sits in the corner",
             0)
 bc = brokenChest.name
 items[bc] = brokenChest
 
+#Monster list
+monsters = {}
+
+small_spider = Monster(
+    0,
+    "spider",
+    5,
+    1,
+    1
+)
+ss = small_spider.name
+monsters[ss] = small_spider
 
 # Declare all the rooms
 rooms = {
     'outside':  Room("Outside Cave Entrance",
-
 """You are standing to the South of the mouth of what
 appears to be a large cavern. It's dark inside of the
 cavern, but you think you make out the shadow of what
 appears to be a foyer with connected rooms...
+There also appears to be something skittering on the floor.""",                        
+    [brokenChest, torch],
+    monsters = [small_spider]),
 
-There also appears to be something skittering on the floor.""",
-                        
-                     [brokenChest, torch]),
-
-    'foyer':    Room("Foyer", """Dim light filters in from the south. Dusty
-passages run north and east.""", []),
+    'foyer':    Room("Foyer",
+"""Dim light filters in from the south. Dusty
+passages run north and east.""",
+    [],
+    []),
 
     'overlook': Room("Grand Overlook", """A steep cliff appears before you, falling
 into the darkness. Ahead to the north, a light flickers in
-the distance, but there is no way across the chasm.""", []),
+the distance, but there is no way across the chasm.""", [], []),
 
     'narrow':   Room("Narrow Passage", """The narrow passage bends here from west
-to north. The smell of gold permeates the air.""", []),
+to north. The smell of gold permeates the air.""", [], []),
 
     'treasure': Room("Treasure Chamber", """You've found the long-lost treasure
 chamber! Sadly, it has already been completely emptied by
-earlier adventurers. The only exit is to the south.""", []),
+earlier adventurers. The only exit is to the south.""", [], []),
 }
 
 # Link rooms together
@@ -63,7 +76,7 @@ rooms['overlook'].s_to = rooms['foyer']
 rooms['narrow'].w_to = rooms['foyer']
 rooms['narrow'].n_to = rooms['treasure']
 rooms['treasure'].s_to = rooms['narrow']
-
+#initial room
 room = rooms['outside']
 
 #
@@ -72,7 +85,7 @@ room = rooms['outside']
 
 # Print important messages
 def sys_print(s):
-    print(f"\n***{s}***")
+    print(f"\n*** {s} ***")
 
 def clear():
     if name == "nt":
@@ -104,11 +117,26 @@ def help():
             * [N,S,E,W] to travel
             * [Inspect] [item] to inspect an item (ex: `inspect rock` to inspect an item named rock)
             * [Take] [item] to take an item (ex: `take rock` to take a rock)
+            * [Drop] [item] to drop an item (ex: `drop rock` to drop a rock)
             * [Q|q] to quit
 
             Written on the wall nearby you see a message, hastily scrawled:
             The rock is a lie
         """
+
+def directions():
+    directions = []
+
+    if hasattr(player.current_room, "n_to"):
+        directions.append("n")
+    if hasattr(player.current_room, "s_to"):
+        directions.append("s")
+    if hasattr(player.current_room, "e_to"):
+        directions.append("e")
+    if hasattr(player.current_room, "w_to"):
+        directions.append("w")
+
+    return directions
 
 def travel(input):    
     availableDirs = directions()
@@ -126,46 +154,6 @@ def travel(input):
     else:
         sys_print("There's nothing in that direction. Try again.")
 
-def parse(input):
-    input = input.lower()
-    clear()
-    inputList = input.split()
-    if len(inputList) > 1:
-        cmd1 = inputList[0]
-        cmd2 = inputList[1]
-
-        if cmd2 == "rock":
-                sys_print("The rock is a lie!!!")
-                return
-
-        if cmd1 == "take":
-            item = get(cmd2)
-            if item:
-                take(item)
-                return
-        elif cmd1 == "inspect":            
-            item = get(cmd2)
-            inspect(item)
-            return
-        if len(inputList) >2:
-            sys_print("warning, a maximum of 2 commands (words separated by a space) will be used")
-            return
-    else:    
-        dirs = ["n", "e", "s", "w"]
-        
-        if input == "q":
-            exit(0)
-        elif input == "help" or input == "?" or input.lower() == "h":
-            print(help())
-            return
-        elif input in dirs:
-            travel(input)
-            return
-        elif input == "l":
-            look()
-            return        
-    sys_print("invalid command")
-
 def look():    
     sys_print("You look around the room and see:")
     instructions = "try \"take rock\" to take a rock, or \"inspect rock\" to inspect it"
@@ -177,8 +165,6 @@ def look():
     item_descs = [x.room_description for x in player.current_room.items]
     for i, _ in enumerate(item_descs):
         print(f"{player.current_room.items[i].name}: {item_descs[i]}")
-    
-    # print(f"{item_names}\n{item_descs}\n")
     sys_print(instructions)
 
 def get(item_name):
@@ -198,7 +184,7 @@ def inspect(item):
 
 def take(item):
     if isinstance(item, LightSource) or isinstance(item, Weapon):
-        hand = input(f"{item.name} is equippable. Which hand would you like to equip it in? l or L for left | r or R for right:")
+        hand = input(f"{item.name} is equippable. Which hand would you like to equip it in? l or L for left | r or R for right: ")
         player.equipItem(hand, item)
     else:
         if item.id != 1:            
@@ -206,19 +192,6 @@ def take(item):
         else:
             sys_print(f"You aren't able to equip {item}. Try inspecting it")
 
-def directions():
-    directions = []
-
-    if hasattr(player.current_room, "n_to"):
-        directions.append("n")
-    if hasattr(player.current_room, "s_to"):
-        directions.append("s")
-    if hasattr(player.current_room, "e_to"):
-        directions.append("e")
-    if hasattr(player.current_room, "w_to"):
-        directions.append("w")
-
-    return directions
 
 def prompt(s):
     # print a lit of commands, printing every other element in directions as a str
@@ -227,9 +200,80 @@ def prompt(s):
 
     return input(s + prompt)
 
+def parse(input):
+    input = input.lower()
+    clear()
+    inputList = input.split()
+    if len(inputList) > 1:
+        cmd1 = inputList[0]
+        cmd2 = inputList[1]
+
+        if cmd2 == "rock":
+                if player.current_room != rooms['treasure']:
+                    sys_print("The rock is a lie!!!")
+                else:
+                    sys_print("You win! ... ... a rock? Thanks for playing!")
+                    #empty line
+                    print()
+                    exit(0)
+                return
+
+        if cmd1 == "take":
+            item = get(cmd2)
+            if item:
+                take(item)
+                return
+
+        elif cmd1 == "inspect":            
+            item = get(cmd2)
+            inspect(item)
+            return
+
+        elif cmd1 == "drop":
+            player.dropItem(cmd2)
+            return
+
+        elif cmd1 == "fight":            
+            player.fight(cmd2)
+            return
+
+        if len(inputList) >2:
+            sys_print("warning, a maximum of 2 commands (words separated by a space) will be used")
+            return
+    else:    
+        dirs = ["n", "e", "s", "w"]
+        
+        if input == "q":
+            exit(0)
+        elif input == "help" or input == "?" or input.lower() == "h":
+            print(help())
+            return
+        elif input in dirs:
+            travel(input)
+            return
+        elif input == "l":
+            look()
+            return        
+    sys_print("invalid command")
+
 while True:
+    # check if the player can see
     if player.has_light() == True or player.current_room == rooms['outside']:
         p = prompt(f"\n{player.current_room.description}\n")
     else:
-        p = prompt(f"\nIt's dark. Maybe you should find some light\n")
+        dark_text = "It's dark. Maybe you should find some light"
+        
+        if player.current_room == rooms['overlook']:
+            print("""
+You stumble forward, hands in front of you - feeling
+for something to familiarize yourself with.
+
+You hear an echo and see a light in the distance.
+You continue forward...""")
+            sys_print("You have fallen to your death!")
+            # empty line
+            print()
+            exit(0)
+        else:
+            p = prompt(f"\n{dark_text}\n")
     parse(p)

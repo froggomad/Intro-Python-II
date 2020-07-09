@@ -98,7 +98,7 @@ class Player(Mob):
                 self.current_room.items.append(thisItem)
                 #Attack value changed:
                 if old_attack != self.attack_damage():
-                    sys_print(f"your attack was {old_attack} and after equipping {item.name} it is now {self.attack}")
+                    sys_print(f"your attack was {old_attack} and after equipping {item.name} it is now {self.attack_damage()}")
             
                 #light changed:
                 if had_light == False and self.has_light() == True:
@@ -106,16 +106,41 @@ class Player(Mob):
             else:
                 sys_print("Please, don't try to drop your hands. That would be fatal.")
 
-    def fight(self, monster):
-        if isinstance(monster, Monster):
+    def fight(self, monster_name):
+        monster = self.find(monster_name)
 
-            return
+        if isinstance(monster, Monster):
+            sys_print(f"{self.name} is fighting {monster.name}. {self.name} has {self.health} health and {monster} has {monster.health} health" )
+            while monster.health > 0 and self.health > 0:
+                if monster.health > 0:                    
+                    self.health -= monster.attack
+                    sys_print(f"{monster.name} hits {self.name} for {monster.attack} damage. {self.name} has {self.health} health remaining")                    
+
+                if self.health > 0:
+                    damage = self.attack_damage()                    
+                    monster.health -= damage
+                    sys_print(f"{self.name} hits {monster.name} for {damage} damage. {monster.name} has {monster.health} health remaining")
+
+            if monster.health <= 0:
+                self.current_room.monsters.remove(monster)
+                print(f"{monster.name} died!")
+            else:
+                print(f"{self.name} met their demise by {monster.name}. Thanks for playing!")
+                exit(0)
         else:
             sys_print(f"If you really thought you could fight a {monster}, you probably also believe in \"the rock\"!")
 
+    def find(self, monster_name):
+        for m in self.current_room.monsters:
+            if m.name == monster_name:
+                return m
+
+        return monster_name
+
 class Monster(Mob):
-    def __init__(self, name, health, experience):
-        super().__init__(name, health, experience)        
+    def __init__(self, id, name, health, attack, experience):
+        super().__init__(name, health, experience)
+        self.attack = attack
 
     def __str__(self):
         return f"{self.name} has {self.health} health and is worth {self.experience} experience"

@@ -3,7 +3,8 @@
 from item import Item
 
 class Room:
-    def __init__(self, name, description, items):
+    def __init__(self, name, description, items, monsters):
         self.name = name
         self.description = description
         self.items = items
+        self.monsters = monsters
