@@ -9,8 +9,9 @@ class Mob:
         self.experience = experience
         
 class Player(Mob):
-    def __init__(self, name, health, experience = 0, gold = 0):
+    def __init__(self, name, current_room, health, experience = 0, gold = 0):
         super().__init__(name, health, experience)        
+        self.current_room = current_room
         self.gold = gold
         self.inventory = []
 

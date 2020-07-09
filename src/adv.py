@@ -54,8 +54,10 @@ def sysPrint(s):
     
 # Make a new player object that is currently in the 'outside' room.
 i = input("Welcome to Cavern of Marvelous Adventures! Please enter your name:\n")
-player = Player(i, 100, 0, 0)
-sysPrint(f"\nWelcome to your doom, {player.name}")
+player = Player(i, room, 100, 0, 0)
+# empty line
+print()
+sysPrint(f"Welcome to your doom, {player.name}")
 # Write a loop that:
 #
 # * Prints the current room name
@@ -80,10 +82,26 @@ def help():
             The rock is a lie
         """
 
-def parse(input):
-    global room
-    dirs = ["n", "N", "e", "E", "s", "S", "w", "W"]
+def travel(input):    
     availableDirs = directions()
+
+    for dir in availableDirs:
+        dir = dir.lower()
+    input = input.lower()
+    if input in availableDirs:
+        if input == "n":
+            player.current_room = player.current_room.n_to
+        elif input == "s":
+            player.current_room = player.current_room.s_to
+        elif input == "e":
+            player.current_room = player.current_room.e_to
+        elif input == "w":
+            player.current_room = player.current_room.w_to
+    else:
+        sysPrint("There's nothing in that direction. Try again.")
+
+def parse(input):    
+    dirs = ["n", "N", "e", "E", "s", "S", "w", "W"]    
     
     if input == "q" or input == "Q":
         exit(0)
@@ -91,19 +109,8 @@ def parse(input):
         print(help())
 
     elif input in dirs:
-        for dir in availableDirs:
-            dir = dir.lower
-        if input in availableDirs:
-            if input == "n" or input == "N":
-                room = room.n_to
-            elif input == "s" or input == "S":
-                room = room.s_to
-            elif input == "e" or input == "E":
-                room = room.e_to
-            elif input == "w" or input == "W":
-                room = room.w_to
-        else:
-            sysPrint("There's nothing in that direction. Try again.")
+        travel(input)
+
     elif input == "l" or input == "L":
         look()
     else:
@@ -113,7 +120,7 @@ def look():
     sysPrint("You look around the room and see:")
     #empty line
     print()    
-    print("\n".join([str(x) for x in room.items]))
+    print("\n".join([str(x) for x in player.current_room.items]))
 
 def inspect(item):
     print(item.description)
@@ -121,16 +128,16 @@ def inspect(item):
 def directions():
     directions = []
 
-    if hasattr(room, "n_to"):
+    if hasattr(player.current_room, "n_to"):
         directions.append("n")
         directions.append("N")
-    if hasattr(room, "s_to"):
+    if hasattr(player.current_room, "s_to"):
         directions.append("s")
         directions.append("S")
-    if hasattr(room, "e_to"):
+    if hasattr(player.current_room, "e_to"):
         directions.append("e")
         directions.append("E")
-    if hasattr(room, "w_to"):
+    if hasattr(player.current_room, "w_to"):
         directions.append("w")
         directions.append("W")
 
