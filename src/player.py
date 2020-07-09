@@ -1,9 +1,11 @@
 # Write a class to hold player information, e.g. what room they are in
 # currently.
 from item import Item, Weapon, LightSource
-#from adv import sys_print
 
 # TODO: Monster system
+
+def sys_print(s):
+    print(f"\n***{s}***")
 
 class Mob:
     def __init__(self, name, health, experience):
@@ -35,7 +37,7 @@ class Player(Mob):
                 self.rightHandItem = item
                 self.attack += item.attack
             else:
-                print(f"{hand} isn't a hand you can equip to. Please choose `l` or `r`")
+                sys_print(f"`{hand}` isn't a hand you can equip to. Please choose `l` or `r`")
                 return
         else:
             print(f"You can only equip weapons and light sources at this time. {item.name} isn't a weapon or light source.")

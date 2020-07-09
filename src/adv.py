@@ -18,7 +18,7 @@ items[t] = torch
 
 brokenChest = Item(1,
             "chest",
-            "its lock clearly having been picked by an adventurer before you. There's nothing you can do with this.",
+            "its lock clearly having been picked by an adventurer before you, and it's contents emptied - there's nothing you can do with this.",
             "a battered wooden chest sits in the corner",            
             0)
 bc = brokenChest.name
@@ -100,10 +100,10 @@ def help():
     return """
             A friendly digitized voice that seems out of place in this dank, harsh environment says to you:
 
-            * [l|L] to look around
-            * [N,S,E,W|n,s,e,w] to travel
-            * [i|I] [item] to inspect an item (ex: `i rock` to inspect an item named rock)
-            * [t|T] [item] to take an item (ex: `t rock` to take a rock)
+            * [L] to look around
+            * [N,S,E,W] to travel
+            * [Inspect] [item] to inspect an item (ex: `inspect rock` to inspect an item named rock)
+            * [Take] [item] to take an item (ex: `take rock` to take a rock)
             * [Q|q] to quit
 
             Written on the wall nearby you see a message, hastily scrawled:
@@ -127,6 +127,7 @@ def travel(input):
         sys_print("There's nothing in that direction. Try again.")
 
 def parse(input):
+    input = input.lower()
     clear()
     inputList = input.split()
     if len(inputList) > 1:
@@ -135,7 +136,12 @@ def parse(input):
 
         if cmd1 == "take":
             item = get(cmd2)
-            take(item)
+            if item:
+                take(item)
+        
+        elif cmd1 == "inspect":
+            item = get(cmd2)
+            inspect(item)
 
         if len(inputList) >2:
             sys_print("warning, a maximum of 2 commands (words separated by a space) will be used")
@@ -143,15 +149,15 @@ def parse(input):
     else:    
         dirs = ["n", "e", "s", "w"]
         
-        if input.lower() == "q":
+        if input == "q":
             exit(0)
-        elif input.lower() == "help" or input == "?" or input.lower() == "h":
+        elif input == "help" or input == "?" or input.lower() == "h":
             print(help())
 
-        elif input.lower() in dirs:
+        elif input in dirs:
             travel(input)
 
-        elif input.lower() == "l":
+        elif input == "l":
             look()
         else:
             sys_print("invalid command")
@@ -171,10 +177,16 @@ def look():
     # print(f"{item_names}\n{item_descs}\n")
     sys_print(instructions)
 
-def get(item):
-    return items[item]
+def get(item_name):
+    try:
+        item = items[item_name]
+    except KeyError:
+        sys_print(f"{item_name} isn't a valid item name")
+        return
+    return item
 
 def inspect(item):
+    sys_print(f"You are inspecting a(n) {item.name}")
     print(item.description)
 
 def take(item):
@@ -211,4 +223,3 @@ def prompt(s):
 while True:
     p = prompt(f"\n{player.current_room.description}\n")
     parse(p)
-#def inspect
