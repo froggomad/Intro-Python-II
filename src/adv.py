@@ -11,7 +11,7 @@ torch = LightSource(0,
                     "a crude stick with an oil soaked rag at its tip",
                     "a torch lies on the floor next to it, hastily discarded.",
                     0,
-                    1,
+                    0,
                     4)
 t = torch.name
 items[t] = torch
@@ -228,5 +228,8 @@ def prompt(s):
     return input(s + prompt)
 
 while True:
-    p = prompt(f"\n{player.current_room.description}\n")
+    if player.has_light() == True or player.current_room == rooms['outside']:
+        p = prompt(f"\n{player.current_room.description}\n")
+    else:
+        p = prompt(f"\nIt's dark. Maybe you should find some light\n")
     parse(p)
