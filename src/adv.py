@@ -4,29 +4,44 @@ from player import Player, Monster
 from os import system, name
 
 #Item list
-items = {}
+torch = LightSource(
+    0,
+    "torch",
+    "a crude stick with an oil soaked rag at its tip",
+    "a torch lies on the floor next to it, hastily discarded.",
+    0,
+    0,
+    4
+)
 
-torch = LightSource(0,
-                    "torch",
-                    "a crude stick with an oil soaked rag at its tip",
-                    "a torch lies on the floor next to it, hastily discarded.",
-                    0,
-                    0,
-                    4)
-t = torch.name
-items[t] = torch
+broken_chest = Item(
+    1,
+    "chest",
+    "its lock clearly having been picked by an adventurer before you, and it's contents emptied - there's nothing you can do with this.",
+    "a battered wooden chest sits in the corner",
+    0
+)
 
-brokenChest = Item(1,
-            "chest",
-            "its lock clearly having been picked by an adventurer before you, and it's contents emptied - there's nothing you can do with this.",
-            "a battered wooden chest sits in the corner",
-            0)
-bc = brokenChest.name
-items[bc] = brokenChest
+rusty_sword = Weapon(
+    2,
+    "rusty_sword",
+    "rusting, it could probably do better if it were sharpened",
+    "a rusty sword lies nearby under a drip somewhere on the cavern's ceiling",
+    2,
+    4
+)
+
+golden_sword = Weapon(
+    3,
+    "golden_sword",
+    """What's visible, shining and shimmering, this 
+    brilliant blade has clearly been well taken care of""",
+    "a golden sword lies buried to the hilt in a large stone just before the mouth of the chasm",
+    2000,
+    100
+)
 
 #Monster list
-monsters = {}
-
 small_spider = Monster(
     0,
     "spider",
@@ -34,36 +49,69 @@ small_spider = Monster(
     1,
     1
 )
-ss = small_spider.name
-monsters[ss] = small_spider
+
+skeleton = Monster(
+    1,
+    "skeleton",
+    10,
+    3,
+    5
+)
+
+dragon = Monster(
+    2,
+    "dragon",
+    200,
+    88,
+    1000
+)
+
 
 # Declare all the rooms
 rooms = {
-    'outside':  Room("Outside Cave Entrance",
-"""You are standing to the South of the mouth of what
-appears to be a large cavern. It's dark inside of the
-cavern, but you think you make out the shadow of what
-appears to be a foyer with connected rooms...
-There also appears to be something skittering on the floor.""",                        
-    [brokenChest, torch],
-    []),
+    'outside': Room("Outside Cave Entrance",
+     """
+     You are standing to the South of the mouth of what
+     appears to be a large cavern. It's dark inside of the
+     cavern, but you think you make out the shadow of what
+     appears to be a foyer with connected rooms...
+     There also appears to be something skittering on the floor.
+     """,
+     [broken_chest, torch],
+     []
+    ),
 
-    'foyer':    Room("Foyer",
-"""Dim light filters in from the south. Dusty
-passages run north and east.""",
-    [],
-    [small_spider]),
+    'foyer': Room("Foyer",
+     """
+     Dim light filters in from the south. Dusty
+     passages run north and east.
+     """,
+     [broken_chest, rusty_sword],
+     [small_spider]
+    ),
 
-    'overlook': Room("Grand Overlook", """A steep cliff appears before you, falling
-into the darkness. Ahead to the north, a light flickers in
-the distance, but there is no way across the chasm.""", [], []),
+    'overlook': Room("Grand Overlook",
+     """
+     A steep cliff appears before you, falling
+     into the darkness. Ahead to the north, a light flickers in
+     the distance, but there is no way across the chasm.""", [golden_sword], [skeleton]),
+     'narrow':   Room("Narrow Passage", """The narrow passage bends here from west
+     to north. The smell of gold permeates the air.
+     """,
+     [],
+     []
+    ),
 
-    'narrow':   Room("Narrow Passage", """The narrow passage bends here from west
-to north. The smell of gold permeates the air.""", [], []),
-
-    'treasure': Room("Treasure Chamber", """You've found the long-lost treasure
-chamber! Sadly, it has already been completely emptied by
-earlier adventurers. The only exit is to the south.""", [], []),
+    'treasure': Room("Treasure Chamber",
+     """
+     You've found the long-lost treasure
+     chamber! Sadly, it has already been completely emptied by
+     earlier adventurers. A dragon stubbornly guards the far end
+     of the room. The only exit is to the south.
+     """,
+     [],
+     [dragon]
+    ),
 }
 
 # Link rooms together
@@ -162,7 +210,7 @@ def look():
 
     #empty line
     print()
-    
+
     if len(player.current_room.items) == 0:
         print(f"There are no items here. If there were, you could {item_instructions}")
         item_instructions = ""
