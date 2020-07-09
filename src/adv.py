@@ -34,11 +34,10 @@ rusty_sword = Weapon(
 golden_sword = Weapon(
     3,
     "golden_sword",
-    """What's visible, shining and shimmering, this 
-    brilliant blade has clearly been well taken care of""",
+    "This brilliant blade has clearly been well taken care of",
     "a golden sword lies buried to the hilt in a large stone just before the mouth of the chasm",
     2000,
-    100
+    200
 )
 
 #Monster list
@@ -69,48 +68,59 @@ dragon = Monster(
 
 # Declare all the rooms
 rooms = {
-    'outside': Room("Outside Cave Entrance",
-     """
-     You are standing to the South of the mouth of what
-     appears to be a large cavern. It's dark inside of the
-     cavern, but you think you make out the shadow of what
-     appears to be a foyer with connected rooms...
-     There also appears to be something skittering on the floor.
-     """,
-     [broken_chest, torch],
-     []
+
+    'outside': Room(
+        "Outside Cave Entrance",
+        """
+        You are standing to the South of the mouth of what
+        appears to be a large cavern. It's dark inside of the
+        cavern, but you think you make out the shadow of what
+        appears to be a foyer with connected rooms...
+        There also appears to be something skittering on the floor.
+        """,
+        [broken_chest, torch],
+        []
     ),
 
-    'foyer': Room("Foyer",
-     """
-     Dim light filters in from the south. Dusty
-     passages run north and east.
-     """,
-     [broken_chest, rusty_sword],
-     [small_spider]
+    'foyer': Room(
+        "Foyer",
+        """
+        Dim light filters in from the south. Dusty
+        passages run north and east.
+        """,
+        [broken_chest, rusty_sword],
+        [small_spider]
     ),
 
-    'overlook': Room("Grand Overlook",
-     """
-     A steep cliff appears before you, falling
-     into the darkness. Ahead to the north, a light flickers in
-     the distance, but there is no way across the chasm.""", [golden_sword], [skeleton]),
-     'narrow':   Room("Narrow Passage", """The narrow passage bends here from west
-     to north. The smell of gold permeates the air.
-     """,
-     [],
-     []
+    'overlook': Room(
+        "Grand Overlook",
+        """
+        A steep cliff appears before you, falling
+        into the darkness. Ahead to the north, a light flickers in
+        the distance, but there is no way across the chasm.
+        """,
+        [golden_sword],
+        [skeleton]),
+    'narrow':   Room(
+        "Narrow Passage",
+        """
+        The narrow passage bends here from west
+        to north. The smell of gold permeates the air.
+        """,
+        [],
+        []
     ),
 
-    'treasure': Room("Treasure Chamber",
-     """
-     You've found the long-lost treasure
-     chamber! Sadly, it has already been completely emptied by
-     earlier adventurers. A dragon stubbornly guards the far end
-     of the room. The only exit is to the south.
-     """,
-     [],
-     [dragon]
+    'treasure': Room(
+        "Treasure Chamber",
+        """
+        You've found the long-lost treasure
+        chamber! Sadly, it has already been completely emptied by
+        earlier adventurers. A dragon stubbornly guards the far end
+        of the room. The only exit is to the south.
+        """,
+        [],
+        [dragon]
     ),
 }
 
@@ -147,25 +157,21 @@ player = Player(i, room, 100, 0, 0)
 
 clear()
 sys_print(f"Welcome to your doom, {player.name}")
-# Write a loop that:
-#
-# * Prints the current room name
-# * Prints the current description (the textwrap module might be useful here).
-# * Waits for user input and decides what to do.
-#
-# If the user enters a cardinal direction, attempt to move to the room there.
-# Print an error message if the movement isn't allowed.
-#
-# If the user enters "q", quit the game.
+
 def help():
     return """
             A friendly digitized voice that seems out of place in this dank, harsh environment says to you:
 
             * [L] to look around
             * [N,S,E,W] to travel
-            * [Inspect] [item] to inspect an item (ex: `inspect rock` to inspect an item named rock)
-            * [Take] [item] to take an item (ex: `take rock` to take a rock)
-            * [Drop] [item] to drop an item (ex: `drop rock` to drop a rock)
+            * [Inspect] [item] to inspect an item 
+                (ex: `inspect rock` to inspect an item named rock)
+            * [Take] [item] to take an item 
+                (ex: `take rock` to take a rock)
+            * [Drop] [item] to drop an item 
+                (ex: `drop rock` to drop a rock)
+            * [Equip] [Item] to equip an item in your inventory 
+                (ex: `equip sword` to equip a sword you already have)
             * [Q|q] to quit
 
             Written on the wall nearby you see a message, hastily scrawled:
@@ -191,45 +197,48 @@ def travel(input):
 
     input = input.lower()
     if input in availableDirs:
-        if input == "n":
+        if input == "n" or input == "north":
             player.current_room = player.current_room.n_to
-        elif input == "s":
+        elif input == "s" or input == "south":
             player.current_room = player.current_room.s_to
-        elif input == "e":
+        elif input == "e" or input == "east":
             player.current_room = player.current_room.e_to
-        elif input == "w":
+        elif input == "w" or input == "west":
             player.current_room = player.current_room.w_to
     else:
         sys_print("There's nothing in that direction. Try again.")
 
-def look():    
-    sys_print("You look around the room and see:")
+def look():
+    if player.has_light() or player.current_room == rooms['outside']:
+        sys_print("You look around the room and see:")
 
-    item_instructions = "try \"take rock\" to take a rock, or \"inspect rock\" to inspect it"
-    monster_instructions = "try \"fight spider\" to fight a spider"    
+        item_instructions = "try \"take rock\" to take a rock, or \"inspect rock\" to inspect it"
+        monster_instructions = "try \"fight spider\" to fight a spider"    
 
-    #empty line
-    print()
+        #empty line
+        print()
 
-    if len(player.current_room.items) == 0:
-        print(f"There are no items here. If there were, you could {item_instructions}")
-        item_instructions = ""
+        if len(player.current_room.items) == 0:
+            print(f"There are no items here. If there were, you could {item_instructions}")
+            item_instructions = ""
 
-    if len(player.current_room.monsters) == 0:
-        print(f"There are no monsters here. If there were, you could {monster_instructions}")
-        monster_instructions = ""
+        if len(player.current_room.monsters) == 0:
+            print(f"There are no monsters here. If there were, you could {monster_instructions}")
+            monster_instructions = ""
 
-    #print the room_description(s)
-    item_descs = [x.room_description for x in player.current_room.items]
-    for i, _ in enumerate(item_descs):
-        print(f"{player.current_room.items[i].name}: {item_descs[i]}")
-    #empty line
-    print()
-    #print monsters in the room:
-    for i in player.current_room.monsters:
-        print(i.name)
-    instructions = item_instructions + "\n" + monster_instructions
-    sys_print(f"\n{instructions}\n")
+        #print the room_description(s)
+        item_descs = [x.room_description for x in player.current_room.items]
+        for i, _ in enumerate(item_descs):
+            print(f"{player.current_room.items[i].name}: {item_descs[i]}")
+        #empty line
+        print()
+        #print monsters in the room:
+        for i in player.current_room.monsters:
+            print(i.name)
+        instructions = item_instructions + "\n" + monster_instructions
+        sys_print(f"\n{instructions}\n")
+    else:
+        sys_print(f"Maybe if you had some light, you could see what the heck was happening!")
 
 def inspect(item):    
     if isinstance(item, Item):
@@ -237,9 +246,6 @@ def inspect(item):
         print(item.description)
     else:
         return
-
-
-
 
 def prompt(s):
     # print a lit of commands, printing every other element in directions as a str
@@ -275,6 +281,11 @@ def parse(input):
             inspect(item)
             return
 
+        elif cmd1 == "equip":
+            item = player.get_from_inventory(cmd2)
+            player.equipItem(item)
+            return
+
         elif cmd1 == "drop":
             player.dropItem(cmd2)
             return
@@ -302,9 +313,21 @@ def parse(input):
             return        
     sys_print("invalid command")
 
+# Write a loop that:
+#
+# * Prints the current room name
+# * Prints the current description (the textwrap module might be useful here).
+# * Waits for user input and decides what to do.
+#
+# If the user enters a cardinal direction, attempt to move to the room there.
+# Print an error message if the movement isn't allowed.
+#
+# If the user enters "q", quit the game.
+
 while True:
     # check if the player can see
     if player.has_light() == True or player.current_room == rooms['outside']:
+        sys_print(f"{player.current_room.name}")
         p = prompt(f"\n{player.current_room.description}\n")
     else:
         dark_text = "It's dark. Maybe you should find some light"
