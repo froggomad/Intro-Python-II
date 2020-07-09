@@ -46,13 +46,13 @@ cavern, but you think you make out the shadow of what
 appears to be a foyer with connected rooms...
 There also appears to be something skittering on the floor.""",                        
     [brokenChest, torch],
-    monsters = [small_spider]),
+    []),
 
     'foyer':    Room("Foyer",
 """Dim light filters in from the south. Dusty
 passages run north and east.""",
     [],
-    []),
+    [small_spider]),
 
     'overlook': Room("Grand Overlook", """A steep cliff appears before you, falling
 into the darkness. Ahead to the north, a light flickers in
@@ -85,7 +85,7 @@ room = rooms['outside']
 
 # Print important messages
 def sys_print(s):
-    print(f"\n*** {s} ***")
+    print(f"\n***{s}***")
 
 def clear():
     if name == "nt":
@@ -156,24 +156,32 @@ def travel(input):
 
 def look():    
     sys_print("You look around the room and see:")
-    instructions = "try \"take rock\" to take a rock, or \"inspect rock\" to inspect it"
+
+    item_instructions = "try \"take rock\" to take a rock, or \"inspect rock\" to inspect it"
+    monster_instructions = "try \"fight spider\" to fight a spider"    
+
     #empty line
     print()
-    if player.current_room.items == 0:
-        print(f"Nothing. If there were items here, you could {instructions}")
+    
+    if len(player.current_room.items) == 0:
+        print(f"There are no items here. If there were, you could {item_instructions}")
+        item_instructions = ""
+
+    if len(player.current_room.monsters) == 0:
+        print(f"There are no monsters here. If there were, you could {monster_instructions}")
+        monster_instructions = ""
+
     #print the room_description(s)
     item_descs = [x.room_description for x in player.current_room.items]
     for i, _ in enumerate(item_descs):
         print(f"{player.current_room.items[i].name}: {item_descs[i]}")
-    sys_print(instructions)
-
-def get(item_name):
-    try:
-        item = items[item_name]
-    except KeyError:
-        sys_print(f"{item_name} isn't a valid item name")
-        return
-    return item
+    #empty line
+    print()
+    #print monsters in the room:
+    for i in player.current_room.monsters:
+        print(i.name)
+    instructions = item_instructions + "\n" + monster_instructions
+    sys_print(f"\n{instructions}\n")
 
 def inspect(item):    
     if isinstance(item, Item):
@@ -182,15 +190,7 @@ def inspect(item):
     else:
         return
 
-def take(item):
-    if isinstance(item, LightSource) or isinstance(item, Weapon):
-        hand = input(f"{item.name} is equippable. Which hand would you like to equip it in? l or L for left | r or R for right: ")
-        player.equipItem(hand, item)
-    else:
-        if item.id != 1:            
-            player.inventory.append(item)
-        else:
-            sys_print(f"You aren't able to equip {item}. Try inspecting it")
+
 
 
 def prompt(s):
@@ -219,13 +219,11 @@ def parse(input):
                 return
 
         if cmd1 == "take":
-            item = get(cmd2)
-            if item:
-                take(item)
+                player.take(cmd2)
                 return
 
         elif cmd1 == "inspect":            
-            item = get(cmd2)
+            item = player.find(cmd2)
             inspect(item)
             return
 

@@ -82,32 +82,51 @@ class Player(Mob):
         elif item == self.rightHandItem.name:
             return self.rightHandItem
 
-    def dropItem(self, item):
+    def take(self, item_name):
+        item = self.find(item_name)
+
+        if isinstance(item, LightSource) or isinstance(item, Weapon):
+            hand = input(f"{item.name} is equippable. Which hand would you like to equip it in? l or L for left | r or R for right: ")
+            self.equipItem(hand, item)
+        else:
+            if item.id != 1:            
+                self.inventory.append(item)
+            else:
+                sys_print(f"You aren't able to equip {item}. Try inspecting it")
+
+    def find(self, item_name):
+        for i in self.current_room.items:
+            if item_name == i.name:
+                return i        
+        return item_name
+
+    def dropItem(self, item_name):
         old_attack = self.attack_damage()
         had_light = self.has_light()
 
-        thisItem = self.get_from_inventory(item)
-        if thisItem:
-            if thisItem != self.fist:
-                if thisItem in self.inventory:
-                    self.inventory.remove(thisItem)
-                elif thisItem == self.leftHandItem:
+        this_item = self.get_from_inventory(item_name)
+        if this_item:
+            if this_item != self.fist:
+                if this_item in self.inventory:
+                    self.inventory.remove(this_item)
+                elif this_item == self.leftHandItem:
                     self.leftHandItem = self.fist
-                elif thisItem == self.rightHandItem:
+                elif this_item == self.rightHandItem:
                     self.rightHandItem = self.fist
-                self.current_room.items.append(thisItem)
+                self.current_room.items.append(this_item)
+
                 #Attack value changed:
                 if old_attack != self.attack_damage():
-                    sys_print(f"your attack was {old_attack} and after equipping {item.name} it is now {self.attack_damage()}")
+                    sys_print(f"your attack was {old_attack} and after dropping {this_item.name} it is now {self.attack_damage()}")
             
                 #light changed:
-                if had_light == False and self.has_light() == True:
+                if had_light == True and self.has_light() == False:
                     sys_print("You can't see anything!")
             else:
                 sys_print("Please, don't try to drop your hands. That would be fatal.")
 
     def fight(self, monster_name):
-        monster = self.find(monster_name)
+        monster = self.find_monster(monster_name)
 
         if isinstance(monster, Monster):
             sys_print(f"{self.name} is fighting {monster.name}. {self.name} has {self.health} health and {monster} has {monster.health} health" )
@@ -130,7 +149,7 @@ class Player(Mob):
         else:
             sys_print(f"If you really thought you could fight a {monster}, you probably also believe in \"the rock\"!")
 
-    def find(self, monster_name):
+    def find_monster(self, monster_name):
         for m in self.current_room.monsters:
             if m.name == monster_name:
                 return m
@@ -143,4 +162,4 @@ class Monster(Mob):
         self.attack = attack
 
     def __str__(self):
-        return f"{self.name} has {self.health} health and is worth {self.experience} experience"
+        return f"{self.name} has {self.health} health. {self.name} is worth {self.experience} experience"
