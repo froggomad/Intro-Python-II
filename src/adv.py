@@ -101,6 +101,7 @@ rooms = {
         """,
         [golden_sword],
         [skeleton]),
+        
     'narrow':   Room(
         "Narrow Passage",
         """

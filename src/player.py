@@ -34,22 +34,26 @@ class Player(Mob):
         hand = input("Which hand would you like to equip this item to?")
 
         if isinstance(item, Weapon) or isinstance(item, LightSource):
-            #remove the item from the current room
-            if item in self.current_room.items:
-                self.current_room.items.remove(item)
-            else:
-                self.inventory.remove(item)
+           
             #store the current attack value before equipping a new item (used in output)
             old_attack = self.attack_damage()
 
             had_light = self.has_light()
-
-            if hand == "l":
-                self.inventory.append(self.leftHandItem)
-                self.leftHandItem = item
-            elif hand == "r":
-                self.inventory.append(self.rightHandItem)
-                self.rightHandItem = item       
+            if hand == "l" or hand == "r":
+                #remove the item from the current room or inventory
+                if item in self.current_room.items:
+                    self.current_room.items.remove(item)
+                elif item in self.inventory:
+                    self.inventory.remove(item)
+                #equip it
+                if hand == "l":
+                    if self.leftHandItem != self.fist:
+                        self.inventory.append(self.leftHandItem)
+                    self.leftHandItem = item
+                elif hand == "r":                    
+                    if self.rightHandItem != self.fist:
+                        self.inventory.append(self.rightHandItem)
+                    self.rightHandItem = item
             else:
                 sys_print(f"`{hand}` isn't a hand you can equip to. Please choose `l` or `r`")
                 return
@@ -64,7 +68,7 @@ class Player(Mob):
             if had_light == False and self.has_light() == True:
                 sys_print("You can see again!")
         else:
-            sys_print(f"You can only equip weapons and light sources at this time. {item.name} isn't a weapon or light source.")
+            sys_print(f"You can only equip weapons and light sources at this time. {item} isn't a weapon or light source.")
             return
         #output
         if hand == "l":
@@ -88,17 +92,17 @@ class Player(Mob):
             return self.leftHandItem
         elif item == self.rightHandItem.name:
             return self.rightHandItem
+        sys_print(f"Item not found: {item}")
 
     def take(self, item_name):
         item = self.find(item_name)
 
         if isinstance(item, LightSource) or isinstance(item, Weapon):            
             self.equipItem(item)
+        elif isinstance(item, Item) and item.id != 1:
+            self.inventory.append(item)
         else:
-            if item.id != 1:
-                self.inventory.append(item)
-            else:
-                sys_print(f"You aren't able to equip {item}. Try inspecting it")
+            sys_print(f"You aren't able to equip {item}. Try inspecting it")
 
     def find(self, item_name):
         for i in self.current_room.items:
