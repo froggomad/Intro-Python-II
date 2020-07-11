@@ -99,7 +99,7 @@ class Player(Mob):
     def take(self, item_name):
         item = self.find(item_name)
         if isinstance(item, Item):
-            if item.name == "golden_sword":
+            if item.name == "golden_sword" and not hasattr(self, 'arthur'):
                 sys_print("Did you think you could just take that? It's obviously buried to the hilt!")
                 return
 

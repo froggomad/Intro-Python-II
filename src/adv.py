@@ -322,7 +322,11 @@ def parse(input):
             return
         elif input == "l":
             look()
-            return        
+            return
+        elif input == "arthur":
+            sys_print(f"{player.name} has summoned the power of King Arthur!")
+            player.arthur = True
+            return
     sys_print("invalid command")
 
 # Write a loop that:
@@ -345,6 +349,7 @@ while True:
         dark_text = "It's dark. Maybe you should find some light"
         
         if player.current_room == rooms['overlook']:
+            sys_print(f"You don't have a light!")
             print("""
 You stumble forward, hands in front of you - feeling
 for something to familiarize yourself with.
