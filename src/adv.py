@@ -50,6 +50,10 @@ golden_sword = Weapon(
 small_spider = Monster(
     0,
     "spider",
+    """
+    A harmless looking but very large spider skitters along the floor.
+    This must be what you heard outside.
+    """,
     5,
     1,
     1
@@ -58,6 +62,10 @@ small_spider = Monster(
 skeleton = Monster(
     1,
     "skeleton",
+    """
+    a skeleton's jangly bones quiver at the sight of you
+    it appears to be afraid.
+    """,
     10,
     3,
     5
@@ -66,6 +74,11 @@ skeleton = Monster(
 dragon = Monster(
     2,
     "dragon",
+    """
+        a golden dragon guards the far end of the room
+        orange-hot fire shoots from its snout occasionally
+        it appears to be sleeping...
+    """,
     200,
     88,
     1000
@@ -92,8 +105,7 @@ rooms = {
         "Foyer",
         """
         Dim light filters in from the south. Dusty
-        passages run north and east. You hear something skittering
-        on the cobblestone floor.
+        passages run north and east.
         """,
         [broken_chest, rusty_sword],
         [small_spider]
@@ -186,6 +198,31 @@ def help():
             The rock is a lie
         """
 
+def available_directions():
+    availableDirs = directions()
+
+    if availableDirs.__contains__("n"):
+        availableDirs.append("north")
+        availableDirs.append("up")
+        availableDirs.append("forward")
+        availableDirs.append("forwards")
+
+    if availableDirs.__contains__("s"):
+        availableDirs.append("south")
+        availableDirs.append("down")
+        availableDirs.append("backward")
+        availableDirs.append("backwards")
+
+    if availableDirs.__contains__("e"):
+        availableDirs.append("east")
+        availableDirs.append("right")
+
+    if availableDirs.__contains__("w"):
+        availableDirs.append("west")
+        availableDirs.append("left")
+
+    return availableDirs
+
 def directions():
     directions = []
 
@@ -200,30 +237,13 @@ def directions():
 
     return directions
 
-def travel(input):    
-    availableDirs = directions()
-
-    if availableDirs.__contains__("n"):
-        availableDirs.append("north")
-        availableDirs.append("up")
-
-    if availableDirs.__contains__("s"):
-        availableDirs.append("south")
-        availableDirs.append("down")
-
-    if availableDirs.__contains__("e"):
-        availableDirs.append("east")
-        availableDirs.append("right")
-
-    if availableDirs.__contains__("w"):
-        availableDirs.append("west")
-        availableDirs.append("left")
+def travel(input):   
 
     input = input.lower()
-    if input in availableDirs:
-        if input == "n" or input == "north" or input == "up":
+    if input in available_directions():
+        if input == "n" or input == "north" or input == "up" or input == "forward" or input == "forwards":
             player.current_room = player.current_room.n_to
-        elif input == "s" or input == "south" or input == "down":
+        elif input == "s" or input == "south" or input == "down" or input == "backward" or input == "backwards":
             player.current_room = player.current_room.s_to
         elif input == "e" or input == "east" or input == "right":
             player.current_room = player.current_room.e_to
@@ -258,7 +278,7 @@ def look():
         print()
         #print monsters in the room:
         for i in player.current_room.monsters:
-            print(i.name)
+            print(i.room_description)
         instructions = item_instructions + "\n" + monster_instructions
         sys_print(f"\n{instructions}\n")
     else:
@@ -278,32 +298,40 @@ def prompt(s):
 
     return input(s + prompt)
 
-def parse(input):    
+def parse(inpt):    
     available_commands = [
+        "travel", "walk", "go", "run",
         "take", "t", "steal",
         "pull", "remove", "arthur",
         "inspect", "look",
         "equip", "wear",
         "drop",
         "fight", "attack", "kick", "slap", "hug",
+        "finger",
         "rock"
-    ]        
-    available_commands.extend([item.name for item in player.inventory])
+    ]
+    available_commands.extend(available_directions())
+
+    #add objects available in current room to command list    
     available_commands.extend([item.name for item in player.current_room.items])
+    available_commands.extend([monster.name for monster in player.current_room.monsters])
+    #add player's items
+    available_commands.extend([item.name for item in player.inventory])
     available_commands.append(player.leftHandItem.name)
     available_commands.append(player.rightHandItem.name)
 
-    input = input.lower()
+    inpt = inpt.lower()
     clear()
     # list of commands separated by space
-    inputList = input.split()
+    inputList = inpt.split()
 
     # only allow available commands to be parsed
     commands = []
     for cmd in inputList:            
         if cmd in available_commands:
             commands.append(cmd)
-    if commands:
+
+    if len(commands) >= 1:
         cmd1 = commands[0]
 
     if len(commands) > 1:
@@ -315,17 +343,48 @@ def parse(input):
             if player.current_room != rooms['treasure']:
                 sys_print("The rock is a lie!!!")
             else:
-                sys_print("You win! ... ... a rock? Thanks for playing!")
+                print("""
+                You somehow missed it earlier when you scanned the room,
+                but right in front of the dragon's snout lies a plain looking rock.
+                This must be what all the fuss is about you think to yourself.
+
+                You approach the dragon stealthily, like a thief in the night...
+                As you get closer, you can feel the heat from the occasional lick of flame
+                coming from the sleeping dragon's snout. You time it just right. You reach in...
+                """)
+
+                quest = input("You think you noticed the dragon stirring. Continue? ")
+                if quest == "y" or quest == "yes" or quest == "continue":                    
+                    sys_print("You win! ... ... a rock? Thanks for playing!")
+                else:
+                    print("""
+                    You back away as quietly as you came, scared for your life.
+                    You stumble, making a small, but noticable noise. The dragon opens one eye...
+
+                    Without even seeming to think about it, he opens his mouth, breathes
+                    orange-hot flame and incinerates you in place. The dragon, satisfied
+                    closes his eyes and goes back to sleep.
+
+                    Dragons are so inconsiderate
+                    """)                    
                 #empty line
                 print()
                 exit(0)
 
         # parse verb commands
+        if cmd1 == "travel" or cmd1 == "go" or cmd1 == "run" or cmd1 == "walk":
+            travel(cmd2)
+            return
+
         if cmd1 == "take" or cmd1 == "t" or cmd1 == "steal":
             player.take(cmd2)
             return
 
         elif cmd1 == "pull" or cmd1 == "remove" or cmd1 == "arthur":
+            if cmd1 == "arthur":
+                sys_print(f"{player.name} has summoned the power of King Arthur!")
+                player.arthur = True
+
             player.pull(cmd2)
             return
 
@@ -346,23 +405,29 @@ def parse(input):
         elif cmd1 == "fight" or cmd1 == "attack" or cmd1 == "kick" or cmd1 == "slap" or cmd1 == "hug":
             if cmd1 == "hug":
                 sys_print(f"you try to hug a {cmd2} but it doesn't like that")
+            elif cmd1 == "slap":
+                sys_print(f"you slap a {cmd2} en guarde!")
+            elif cmd1 == "kick":
+                sys_print(f"you kick a {cmd2} in the teeth - ouch your toe!")
+
             player.fight(cmd2)
-            return                  
+            return
+    #single commands
     else:    
         dirs = ["n", "north", "up", "e", "east", "right", "s", "south", "down", "w", "west", "left"]
         
-        if input == "q":
+        if inpt == "q":
             exit(0)
-        elif input == "help" or input == "?" or input == "h":
+        elif inpt == "help" or inpt == "?" or inpt == "h":
             print(help())
             return
-        elif input in dirs:
-            travel(input)
+        elif inpt in dirs:
+            travel(inpt)
             return
-        elif input == "l":
+        elif inpt == "l":
             look()
             return
-        elif input == "arthur":
+        elif inpt == "arthur":
             sys_print(f"{player.name} has summoned the power of King Arthur!")
             player.arthur = True
             return

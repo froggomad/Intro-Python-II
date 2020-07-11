@@ -24,14 +24,15 @@ class Player(Mob):
         self.leftHandItem = self.fist
         self.rightHandItem = self.fist
 
-    def attack_damage(self):
+    def attack_damage(self):        
         return self.leftHandItem.attack + self.rightHandItem.attack        
+        
     
     def has_light(self):
         return isinstance(self.leftHandItem, LightSource) or isinstance(self.rightHandItem, LightSource)
 
     def equipItem(self, item):
-        hand = input("Which hand would you like to equip this item to?")
+        hand = input("Which hand would you like to equip this item to? ")
 
         if isinstance(item, Weapon) or isinstance(item, LightSource):
            
@@ -167,10 +168,15 @@ Did you mean to pull your finger?
                     self.health -= monster.attack
                     sys_print(f"{monster.name} hits {self.name} for {monster.attack} damage. {self.name} has {self.health} health remaining")                    
 
-                if self.health > 0:
+                if self.health > 0:                    
                     damage = self.attack_damage()                    
-                    monster.health -= damage
-                    sys_print(f"{self.name} hits {monster.name} for {damage} damage. {monster.name} has {monster.health} health remaining")
+                    if self.has_light():
+                        sys_print(f"{self.name} hits {monster.name} for {damage} damage. {monster.name} has {monster.health} health remaining")                        
+                        monster.health -= damage
+                    else:
+                        self.health -= damage
+                        print(f"You try your best to hit {monster.name} but you can't see anything!")
+                        sys_print(f"You hit yourself for {damage} damage! You have {self.health} health remaining")
 
             if monster.health <= 0:
                 self.current_room.monsters.remove(monster)
@@ -189,9 +195,10 @@ Did you mean to pull your finger?
         return monster_name
 
 class Monster(Mob):
-    def __init__(self, id, name, health, attack, experience):
+    def __init__(self, id, name, room_description, health, attack, experience):
         super().__init__(name, health, experience)
         self.attack = attack
+        self.room_description = room_description
 
     def __str__(self):
         return f"{self.name} has {self.health} health. {self.name} is worth {self.experience} experience"
