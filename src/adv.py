@@ -1,14 +1,20 @@
 from room import Room, Item
-from item import Item, Weapon, LightSource
+from item import Item, Weapon, LightSource, Gold
 from player import Player, Monster
 from os import system, name
 
 #Item list
+ten_gold = Gold(
+    -1,
+    "a smattering of 10 gold pieces lies on the cobblestone tile next to the rusty sword.",
+    10
+)
+
 torch = LightSource(
     0,
     "torch",
     "a crude stick with an oil soaked rag at its tip",
-    "a torch lies on the floor next to it, hastily discarded.",
+    "a torch lies on the floor next to the chest, hastily discarded.",
     0,
     0,
     4
@@ -78,7 +84,7 @@ rooms = {
         appears to be a foyer with connected rooms...
         There also appears to be something skittering on the floor.
         """,
-        [broken_chest, torch],
+        [broken_chest, torch, ten_gold],
         []
     ),
 
@@ -86,7 +92,8 @@ rooms = {
         "Foyer",
         """
         Dim light filters in from the south. Dusty
-        passages run north and east.
+        passages run north and east. You hear something skittering
+        on the cobblestone floor.
         """,
         [broken_chest, rusty_sword],
         [small_spider]
