@@ -171,7 +171,7 @@ def help():
             A friendly digitized voice that seems out of place in this dank, harsh environment says to you:
 
             * [L] to look around
-            * [N,S,E,W] to travel
+            * [N,S,E,W] [North, South, East, West] [Up, Down, Right, Left] to travel
             * [Inspect] [item] to inspect an item 
                 (ex: `inspect rock` to inspect an item named rock)
             * [Take] [item] to take an item 
@@ -203,15 +203,31 @@ def directions():
 def travel(input):    
     availableDirs = directions()
 
+    if availableDirs.__contains__("n"):
+        availableDirs.append("north")
+        availableDirs.append("up")
+
+    if availableDirs.__contains__("s"):
+        availableDirs.append("south")
+        availableDirs.append("down")
+
+    if availableDirs.__contains__("e"):
+        availableDirs.append("east")
+        availableDirs.append("right")
+
+    if availableDirs.__contains__("w"):
+        availableDirs.append("west")
+        availableDirs.append("left")
+
     input = input.lower()
     if input in availableDirs:
-        if input == "n" or input == "north":
+        if input == "n" or input == "north" or input == "up":
             player.current_room = player.current_room.n_to
-        elif input == "s" or input == "south":
+        elif input == "s" or input == "south" or input == "down":
             player.current_room = player.current_room.s_to
-        elif input == "e" or input == "east":
+        elif input == "e" or input == "east" or input == "right":
             player.current_room = player.current_room.e_to
-        elif input == "w" or input == "west":
+        elif input == "w" or input == "west" or input == "left":
             player.current_room = player.current_room.w_to
     else:
         sys_print("There's nothing in that direction. Try again.")
@@ -269,6 +285,9 @@ def parse(input):
     if len(inputList) > 1:
         cmd1 = inputList[0]
         cmd2 = inputList[1]
+        
+        if len(inputList) >2:
+            sys_print("warning, a maximum of 2 commands (words separated by a space) will be used")
 
         if cmd2 == "rock":
                 if player.current_room != rooms['treasure']:
@@ -277,23 +296,22 @@ def parse(input):
                     sys_print("You win! ... ... a rock? Thanks for playing!")
                     #empty line
                     print()
-                    exit(0)
-                return
+                    exit(0)                
 
-        if cmd1 == "take":
-                player.take(cmd2)
-                return
+        if cmd1 == "take" or cmd1 == "t" or cmd1 == "steal":
+            player.take(cmd2)
+            return
 
-        if cmd1 == "pull":
+        elif cmd1 == "pull" or cmd1 == "remove" or cmd1 == "arthur":
             player.pull(cmd2)
             return
 
-        elif cmd1 == "inspect":            
+        elif cmd1 == "inspect" or cmd1 == "look":            
             item = player.find(cmd2)
             inspect(item)
             return
 
-        elif cmd1 == "equip":
+        elif cmd1 == "equip" or cmd1 == "wear":
             item = player.get_from_inventory(cmd2)
             player.equipItem(item)
             return
@@ -302,19 +320,17 @@ def parse(input):
             player.dropItem(cmd2)
             return
 
-        elif cmd1 == "fight":            
+        elif cmd1 == "fight" or cmd1 == "attack" or cmd1 == "kick" or cmd1 == "slap" or cmd1 == "hug":
+            if cmd1 == "hug":
+                sys_print(f"you try to hug a {cmd2} but it doesn't like that")
             player.fight(cmd2)
-            return
-
-        if len(inputList) >2:
-            sys_print("warning, a maximum of 2 commands (words separated by a space) will be used")
-            return
+            return                  
     else:    
-        dirs = ["n", "e", "s", "w"]
+        dirs = ["n", "north", "up", "e", "east", "right", "s", "south", "down", "w", "west", "left"]
         
         if input == "q":
             exit(0)
-        elif input == "help" or input == "?" or input.lower() == "h":
+        elif input == "help" or input == "?" or input == "h":
             print(help())
             return
         elif input in dirs:
@@ -327,6 +343,7 @@ def parse(input):
             sys_print(f"{player.name} has summoned the power of King Arthur!")
             player.arthur = True
             return
+
     sys_print("invalid command")
 
 # Write a loop that:
