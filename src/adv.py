@@ -278,26 +278,49 @@ def prompt(s):
 
     return input(s + prompt)
 
-def parse(input):
+def parse(input):    
+    available_commands = [
+        "take", "t", "steal",
+        "pull", "remove", "arthur",
+        "inspect", "look",
+        "equip", "wear",
+        "drop",
+        "fight", "attack", "kick", "slap", "hug",
+        "rock"
+    ]        
+    available_commands.extend([item.name for item in player.inventory])
+    available_commands.extend([item.name for item in player.current_room.items])
+    available_commands.append(player.leftHandItem.name)
+    available_commands.append(player.rightHandItem.name)
+
     input = input.lower()
     clear()
+    # list of commands separated by space
     inputList = input.split()
-    if len(inputList) > 1:
-        cmd1 = inputList[0]
-        cmd2 = inputList[1]
-        
-        if len(inputList) >2:
+
+    # only allow available commands to be parsed
+    commands = []
+    for cmd in inputList:            
+        if cmd in available_commands:
+            commands.append(cmd)
+    if commands:
+        cmd1 = commands[0]
+
+    if len(commands) > 1:
+        cmd2 = commands[1]
+        if len(commands) >2:
             sys_print("warning, a maximum of 2 commands (words separated by a space) will be used")
+        #win and exit
+        if cmd1 == "take" and cmd2 == "rock":
+            if player.current_room != rooms['treasure']:
+                sys_print("The rock is a lie!!!")
+            else:
+                sys_print("You win! ... ... a rock? Thanks for playing!")
+                #empty line
+                print()
+                exit(0)
 
-        if cmd2 == "rock":
-                if player.current_room != rooms['treasure']:
-                    sys_print("The rock is a lie!!!")
-                else:
-                    sys_print("You win! ... ... a rock? Thanks for playing!")
-                    #empty line
-                    print()
-                    exit(0)                
-
+        # parse verb commands
         if cmd1 == "take" or cmd1 == "t" or cmd1 == "steal":
             player.take(cmd2)
             return
