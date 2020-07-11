@@ -256,8 +256,8 @@ def inspect(item):
         return
 
 def prompt(s):
-    # print a lit of commands, printing every other element in directions as a str
-    commands = f"([l|L] to look around | {' | '.join(directions())} to travel | [q|Q] to quit | [Help|?] for common commands): "
+    # print a quicklist of commands
+    commands = f"(L to look around | {' | '.join(directions())} to travel | Q to quit | [Help|?] for common commands): "
     prompt = f"\nWhat would you like to do, {player.name}?\n{commands}"
 
     return input(s + prompt)
@@ -283,6 +283,10 @@ def parse(input):
         if cmd1 == "take":
                 player.take(cmd2)
                 return
+
+        if cmd1 == "pull":
+            player.pull(cmd2)
+            return
 
         elif cmd1 == "inspect":            
             item = player.find(cmd2)

@@ -98,13 +98,32 @@ class Player(Mob):
 
     def take(self, item_name):
         item = self.find(item_name)
+        if isinstance(item, Item):
+            if item.name == "golden_sword":
+                sys_print("Did you think you could just take that? It's obviously buried to the hilt!")
+                return
 
-        if isinstance(item, LightSource) or isinstance(item, Weapon):            
-            self.equipItem(item)
-        elif isinstance(item, Item) and item.id != 1:
-            self.inventory.append(item)
-        else:
-            sys_print(f"You aren't able to equip {item}. Try inspecting it")
+            if isinstance(item, LightSource) or isinstance(item, Weapon):            
+                self.equipItem(item)
+            elif item.id != 1:
+                item.to_inventory()
+                self.inventory.append(item)
+            else:
+                sys_print(f"You aren't able to equip {item}. Try inspecting it")
+
+    def pull(self, item_name):
+        item = self.find(item_name)
+        if isinstance(item, Item):
+            if item.name == "golden_sword":
+                self.equipItem(item)            
+            else:
+                print(f"""
+You pull {item_name} with all your might, but nothing happens. 
+Did you mean to pull your finger?
+                """)
+        elif item_name == "finger":
+                sys_print("You're disgusting!")
+        else: sys_print("Invalid item to pull. What were you thinking?")
 
     def find(self, item_name):
         for i in self.current_room.items:
