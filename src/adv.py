@@ -46,6 +46,8 @@ golden_sword = Weapon(
     200
 )
 
+items = [ten_gold.name, torch.name, broken_chest.name, rusty_sword.name, golden_sword.name]
+
 #Monster list
 small_spider = Monster(
     0,
@@ -83,6 +85,8 @@ dragon = Monster(
     88,
     1000
 )
+
+monsters = [small_spider.name, skeleton.name, dragon.name]
 
 
 # Declare all the rooms
@@ -315,6 +319,11 @@ def parse(inpt):
     #add objects available in current room to command list    
     available_commands.extend([item.name for item in player.current_room.items])
     available_commands.extend([monster.name for monster in player.current_room.monsters])
+
+    #add all available objects and monsters
+    #available_commands.extend(items)
+    #available_commands.extend(monsters)
+
     #add player's items
     available_commands.extend([item.name for item in player.inventory])
     available_commands.append(player.leftHandItem.name)
@@ -328,7 +337,7 @@ def parse(inpt):
     # only allow available commands to be parsed
     commands = []
     for cmd in inputList:            
-        if cmd in available_commands:
+        if cmd in available_commands or cmd in items or cmd in monsters:
             commands.append(cmd)
 
     if len(commands) >= 1:
@@ -403,12 +412,16 @@ def parse(inpt):
             return
 
         elif cmd1 == "fight" or cmd1 == "attack" or cmd1 == "kick" or cmd1 == "slap" or cmd1 == "hug":
-            if cmd1 == "hug":
-                sys_print(f"you try to hug a {cmd2} but it doesn't like that")
-            elif cmd1 == "slap":
-                sys_print(f"you slap a {cmd2} en guarde!")
-            elif cmd1 == "kick":
-                sys_print(f"you kick a {cmd2} in the teeth - ouch your toe!")
+            if cmd2 in player.inventory or cmd2 in player.current_room.monsters or cmd2 == player.leftHandItem.name or cmd2 == player.rightHandItem.name:
+                if cmd1 == "hug":
+                    sys_print(f"you try to hug a {cmd2} but it doesn't like that")
+                elif cmd1 == "slap":
+                    sys_print(f"you slap a {cmd2} - en guarde!")
+                elif cmd1 == "kick":
+                    sys_print(f"you kick a {cmd2} in the teeth - ouch your toe!")
+                input(f"{cmd2} seems really upset about that. fight? ")
+            else:
+                sys_print(f"{cmd2} isn't in this room!")
 
             player.fight(cmd2)
             return
