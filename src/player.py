@@ -49,10 +49,12 @@ class Player(Mob):
                 if hand == "l":
                     if self.leftHandItem != self.fist:
                         self.inventory.append(self.leftHandItem)
+                        self.leftHandItem.to_inventory()
                     self.leftHandItem = item
                 elif hand == "r":                    
                     if self.rightHandItem != self.fist:
                         self.inventory.append(self.rightHandItem)
+                        self.rightHandItem.to_inventory()
                     self.rightHandItem = item
             else:
                 sys_print(f"`{hand}` isn't a hand you can equip to. Please choose `l` or `r`")
@@ -120,10 +122,11 @@ class Player(Mob):
                 if this_item in self.inventory:
                     self.inventory.remove(this_item)
                 elif this_item == self.leftHandItem:
-                    self.leftHandItem = self.fist
-                elif this_item == self.rightHandItem:
-                    self.rightHandItem = self.fist
+                    self.leftHandItem = self.fist                    
+                elif this_item == self.rightHandItem:                    
+                    self.rightHandItem = self.fist                    
                 self.current_room.items.append(this_item)
+                this_item.to_floor()
 
                 #Attack value changed:
                 if old_attack != self.attack_damage():
