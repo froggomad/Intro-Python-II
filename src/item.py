@@ -27,21 +27,24 @@ class Container(Item):
         alphabet = list('abcdefghijklmnopqrstuvwxyz')
         if letter in alphabet:
             return alphabet.index(letter)
+    
+    def int_to_letter(self, index):
+        alphabet = list('abcdefghijklmnopqrstuvwxyz')
+        if len(alphabet) >= index + 1:
+            return alphabet[index]
 
     def list_inventory(self, player):
         #letter a to bytes
-        letter_str = bytes('a', 'utf-8')
-        container_items = { }
+        letter_i = self.letter_to_int('a')
 
         for item in self.inventory:
             #decode to string and make uppercase
-            byte_str = letter_str.decode("utf-8")
-            upper_str = byte_str.upper()
-            #output
-            container_items[upper_str] = item.name
+            letter_s = self.int_to_letter(letter_i)
+            upper_str = letter_s.upper()
+            #output            
             print(f"{upper_str}: {item.name}")
-            #increment to the next byte (this will convert to the next character)
-            letter_str = bytes([letter_str[0] + 1])
+            #increment to the next byte (this will convert to the next character)                                    
+            letter_i += 1
         if len(self.inventory) > 0:
             loot = input("select a letter or type `loot item_name` to loot an item: ").lower()
             index = self.letter_to_int(loot)
@@ -52,9 +55,7 @@ class Container(Item):
             else:
                 sys_print(f"{loot} is not an item you can loot from this chest")
         else: 
-            sys_print(f"{self.name} is empty!")
-
-           
+            sys_print(f"{self.name} is empty!")           
 
 class Weapon(Item):
     def __init__(self, id, name, description, room_description, gold, attack):
