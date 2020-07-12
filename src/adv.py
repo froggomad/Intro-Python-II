@@ -1,5 +1,5 @@
 from room import Room, Item
-from item import Item, Weapon, LightSource, Gold
+from item import Item, Weapon, LightSource, Gold, Container
 from player import Player, Monster
 from os import system, name
 
@@ -20,12 +20,12 @@ torch = LightSource(
     4
 )
 
-broken_chest = Item(
+broken_chest = Container(
     1,
     "chest",
     "its lock clearly having been picked by an adventurer before you, and it's contents emptied - there's nothing you can do with this.",
     "a battered wooden chest sits in the corner",
-    0
+    [ten_gold]
 )
 
 rusty_sword = Weapon(
@@ -101,7 +101,7 @@ rooms = {
         appears to be a foyer with connected rooms...
         There also appears to be something skittering on the floor.
         """,
-        [broken_chest, torch, ten_gold],
+        [broken_chest, torch],
         []
     ),
 
@@ -206,24 +206,17 @@ def available_directions():
     availableDirs = directions()
 
     if availableDirs.__contains__("n"):
-        availableDirs.append("north")
-        availableDirs.append("up")
-        availableDirs.append("forward")
-        availableDirs.append("forwards")
+        availableDirs.extend(["north", "up", "forward", "forwards"])
 
     if availableDirs.__contains__("s"):
-        availableDirs.append("south")
-        availableDirs.append("down")
-        availableDirs.append("backward")
-        availableDirs.append("backwards")
+        availableDirs.extend(["south", "down", "backward", "backwards"])
+        
 
     if availableDirs.__contains__("e"):
-        availableDirs.append("east")
-        availableDirs.append("right")
+        availableDirs.extend(["east", "right"])
 
     if availableDirs.__contains__("w"):
-        availableDirs.append("west")
-        availableDirs.append("left")
+        availableDirs.extend(["west", "left"])
 
     return availableDirs
 
@@ -289,10 +282,11 @@ def look():
         sys_print(f"Maybe if you had some light, you could see what the heck was happening!")
 
 def inspect(item):    
-    if isinstance(item, Item):
+    if isinstance(item, Item) and not isinstance(item, Container):
         sys_print(f"You are inspecting a(n) {item.name}")
         print(item.description)
-    else:
+    elif isinstance(item, Container):
+        item.list_inventory(player)  
         return
 
 def prompt(s):
@@ -355,7 +349,8 @@ def parse(inpt):
                 print("""
                 You somehow missed it earlier when you scanned the room,
                 but right in front of the dragon's snout lies a plain looking rock.
-                This must be what all the fuss is about you think to yourself.
+                
+                "This must be what all the fuss is about," you think to yourself.
 
                 You approach the dragon stealthily, like a thief in the night...
                 As you get closer, you can feel the heat from the occasional lick of flame
@@ -412,14 +407,16 @@ def parse(inpt):
             return
 
         elif cmd1 == "fight" or cmd1 == "attack" or cmd1 == "kick" or cmd1 == "slap" or cmd1 == "hug":
-            if cmd2 in player.inventory or cmd2 in player.current_room.monsters or cmd2 == player.leftHandItem.name or cmd2 == player.rightHandItem.name:
+            player_items = [item.name for item in player.inventory]
+            room_items = [item.name for item in player.current_room.items]
+            room_monsters = [monster.name for monster in player.current_room.monsters]
+            if cmd2 in player_items or cmd2 in room_monsters or cmd2 in room_items or cmd2 == player.leftHandItem.name or cmd2 == player.rightHandItem.name:
                 if cmd1 == "hug":
                     sys_print(f"you try to hug a {cmd2} but it doesn't like that")
                 elif cmd1 == "slap":
                     sys_print(f"you slap a {cmd2} - en guarde!")
                 elif cmd1 == "kick":
                     sys_print(f"you kick a {cmd2} in the teeth - ouch your toe!")
-                input(f"{cmd2} seems really upset about that. fight? ")
             else:
                 sys_print(f"{cmd2} isn't in this room!")
 
@@ -443,6 +440,9 @@ def parse(inpt):
         elif inpt == "arthur":
             sys_print(f"{player.name} has summoned the power of King Arthur!")
             player.arthur = True
+            return
+        elif inpt == "inventory" or inpt == "i":
+            player.list_inventory()
             return
 
     sys_print("invalid command")

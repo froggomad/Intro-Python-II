@@ -25,14 +25,13 @@ class Player(Mob):
         self.rightHandItem = self.fist
 
     def attack_damage(self):        
-        return self.leftHandItem.attack + self.rightHandItem.attack        
-        
+        return self.leftHandItem.attack + self.rightHandItem.attack
     
     def has_light(self):
         return isinstance(self.leftHandItem, LightSource) or isinstance(self.rightHandItem, LightSource)
 
     def equipItem(self, item):
-        hand = input("Which hand would you like to equip this item to? ")
+        hand = input("Which hand would you like to equip this item to? ").lower()
 
         if isinstance(item, Weapon) or isinstance(item, LightSource):
            
@@ -47,21 +46,21 @@ class Player(Mob):
                 elif item in self.inventory:
                     self.inventory.remove(item)
                 #equip it
-                if hand == "l":
+                if hand == "l" or hand == "left":
                     if self.leftHandItem != self.fist:
                         self.inventory.append(self.leftHandItem)
                         self.leftHandItem.to_inventory()
                     self.leftHandItem = item
-                elif hand == "r":                    
+                elif hand == "r" or hand == "right":
                     if self.rightHandItem != self.fist:
                         self.inventory.append(self.rightHandItem)
                         self.rightHandItem.to_inventory()
                     self.rightHandItem = item
             else:
-                sys_print(f"`{hand}` isn't a hand you can equip to. Please choose `l` or `r`")
+                sys_print(f"`{hand}` isn't a hand you can equip to. Please choose `l` for left or `r` for right")
                 return
             
-            #Inner-Mark: Output
+        #Inner-Mark: Output
             
             #Attack value changed:
             if old_attack != self.attack_damage():
@@ -73,10 +72,10 @@ class Player(Mob):
         else:
             sys_print(f"You can only equip weapons and light sources at this time. {item} isn't a weapon or light source.")
             return
-        #output
-        if hand == "l":
+        
+        if hand == "l" or hand == "left":
             hand_description = "Left Hand"
-        elif hand == "r":
+        elif hand == "r" or hand == "right":
             hand_description = "Right Hand"
 
         #empty line
@@ -116,20 +115,43 @@ class Player(Mob):
         item = self.find(item_name)
         if isinstance(item, Item):
             if item.name == "golden_sword":
-                self.equipItem(item)            
+                self.equipItem(item)
             else:
                 print(f"""
-You pull {item_name} with all your might, but nothing happens. 
+You pull {item_name} with all your might, but nothing happens.
 Did you mean to pull your finger?
                 """)
         elif item_name == "finger":
                 sys_print("You're disgusting!")
         else: sys_print("Invalid item to pull. What were you thinking?")
 
+    def list_inventory(self):
+        if self.leftHandItem.name == "hand":
+            print(f"Left Hand: fist")
+        else:
+            print(f"Left Hand: {self.leftHandItem}")
+
+        if self.rightHandItem.name == "hand":
+            print(f"Right Hand: fist")
+        else:
+            print(f"Right Hand: {self.rightHandItem}")
+
+        #letter a to bytes
+        letter_str = bytes('a', 'utf-8')
+
+        for item in self.inventory:
+            #decode to string and make uppercase
+            byte_str = letter_str.decode("utf-8")
+            upper_str = byte_str.upper()
+            #output
+            print(f"{upper_str}: {item.name}")
+            #increment to the next byte (this will convert to the next character)
+            letter_str = bytes([letter_str[0] + 1])
+
     def find(self, item_name):
         for i in self.current_room.items:
             if item_name == i.name:
-                return i        
+                return i
         return item_name
 
     def dropItem(self, item_name):
@@ -142,9 +164,9 @@ Did you mean to pull your finger?
                 if this_item in self.inventory:
                     self.inventory.remove(this_item)
                 elif this_item == self.leftHandItem:
-                    self.leftHandItem = self.fist                    
-                elif this_item == self.rightHandItem:                    
-                    self.rightHandItem = self.fist                    
+                    self.leftHandItem = self.fist
+                elif this_item == self.rightHandItem:
+                    self.rightHandItem = self.fist
                 self.current_room.items.append(this_item)
                 this_item.to_floor()
 
@@ -156,7 +178,18 @@ Did you mean to pull your finger?
                 if had_light == True and self.has_light() == False:
                     sys_print("You can't see anything!")
             else:
-                sys_print("Please, don't try to drop your hands. That would be fatal.")
+                if hasattr(self, "hand_drop"):
+                    hand = input(f"Which hand would you like to drop? ")
+                    print("""
+                    You pull and pull with all your might, finally loosening
+                    the connection between your wrist and forearm.
+                    """)
+                    sys_print(f"You drop your {hand} hand for {self.health} damage")
+                    sys_print(f"{self.name} died of a not listening overdose.")
+                    exit(0)
+                else:
+                    sys_print("Please, don't try to drop your hands. That would be fatal.")
+                    self.hand_drop = True
 
     def fight(self, monster_name):
         monster = self.find_monster(monster_name)
@@ -164,14 +197,14 @@ Did you mean to pull your finger?
         if isinstance(monster, Monster):
             sys_print(f"{self.name} is fighting {monster.name}. {self.name} has {self.health} health and {monster} has {monster.health} health" )
             while monster.health > 0 and self.health > 0:
-                if monster.health > 0:                    
+                if monster.health > 0:
                     self.health -= monster.attack
-                    sys_print(f"{monster.name} hits {self.name} for {monster.attack} damage. {self.name} has {self.health} health remaining")                    
+                    sys_print(f"{monster.name} hits {self.name} for {monster.attack} damage. {self.name} has {self.health} health remaining")
 
-                if self.health > 0:                    
-                    damage = self.attack_damage()                    
+                if self.health > 0:
+                    damage = self.attack_damage()
                     if self.has_light():
-                        sys_print(f"{self.name} hits {monster.name} for {damage} damage. {monster.name} has {monster.health} health remaining")                        
+                        sys_print(f"{self.name} hits {monster.name} for {damage} damage. {monster.name} has {monster.health} health remaining")
                         monster.health -= damage
                     else:
                         self.health -= damage
@@ -188,11 +221,11 @@ Did you mean to pull your finger?
             sys_print(f"If you really thought you could fight a {monster}, you probably also believe in \"the rock\"!")
 
     def find_monster(self, monster_name):
-        for m in self.current_room.monsters:
-            if m.name == monster_name:
-                return m
-
-        return monster_name
+        for monster in self.current_room.monsters:
+            if monster.name == monster_name:
+                return monster
+            else:
+                return monster_name
 
 class Monster(Mob):
     def __init__(self, id, name, room_description, health, attack, experience):
