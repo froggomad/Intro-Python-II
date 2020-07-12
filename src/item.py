@@ -46,7 +46,7 @@ class Container(Item):
             #increment to the next byte (this will convert to the next character)                                    
             letter_i += 1
         if len(self.inventory) > 0:
-            loot = input("select a letter or type `loot item_name` to loot an item: ").lower()
+            loot = input("select a letter to loot an item: ").lower()
             index = self.letter_to_int(loot)
 
             if isinstance(index, int) and len(self.inventory) >= index + 1:            

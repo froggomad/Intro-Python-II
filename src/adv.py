@@ -23,7 +23,7 @@ torch = LightSource(
 broken_chest = Container(
     1,
     "chest",
-    "its lock clearly having been picked by an adventurer before you, and it's contents emptied - there's nothing you can do with this.",
+    "its lock was clearly broken, but there appears to be something inside.",
     "a battered wooden chest sits in the corner",
     [ten_gold]
 )
@@ -282,10 +282,12 @@ def look():
         sys_print(f"Maybe if you had some light, you could see what the heck was happening!")
 
 def inspect(item):    
-    if isinstance(item, Item) and not isinstance(item, Container):
+    if isinstance(item, Item):
         sys_print(f"You are inspecting a(n) {item.name}")
         print(item.description)
-    elif isinstance(item, Container):
+    if isinstance(item, Container):
+        #empty line
+        print()
         item.list_inventory(player)  
         return
 
