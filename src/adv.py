@@ -1,12 +1,18 @@
 from room import Room, Item
 from item import Item, Weapon, LightSource, Gold, Container
-from player import Player, Monster
+from player import Player, Monster, Merchant
 from os import system, name
 
 #Item list
 ten_gold = Gold(
     -1,
     "a smattering of 10 gold pieces lies on the cobblestone tile next to the rusty sword.",
+    10
+)
+
+thousand_gold = Gold(
+    -1,
+    "a pile of 1000 gold pieces is piled high in a treasure chest near something.",
     10
 )
 
@@ -20,7 +26,7 @@ torch = LightSource(
     4
 )
 
-broken_chest = Container(
+chest = Container(
     1,
     "chest",
     "its lock was clearly broken, but there appears to be something inside.",
@@ -46,7 +52,7 @@ golden_sword = Weapon(
     200
 )
 
-items = [ten_gold.name, torch.name, broken_chest.name, rusty_sword.name, golden_sword.name]
+items = [ten_gold.name, torch.name, chest.name, rusty_sword.name, golden_sword.name]
 
 #Monster list
 small_spider = Monster(
@@ -73,21 +79,34 @@ skeleton = Monster(
     5
 )
 
-dragon = Monster(
+boulder = Monster(
     2,
+    "boulder",
+    """
+    a menacing-looking, but badly cracked boulder (yes, cracked
+    boulders can look menacing) looks in your direction (yes, cracked
+    boulders can look in your direction.)
+
+    """,
+    20,
+    10,
+    15
+)
+
+dragon = Monster(
+    3,
     "dragon",
     """
-        a golden dragon guards the far end of the room
-        orange-hot fire shoots from its snout occasionally
-        it appears to be sleeping...
+        A golden dragon guards the far end of the room.
+        Orange-hot fire shoots from its snout occasionally.
+        It appears to be sleeping...
     """,
     200,
     88,
     1000
 )
 
-monsters = [small_spider.name, skeleton.name, dragon.name]
-
+monsters = [small_spider.name, skeleton.name, dragon.name, boulder.name]
 
 # Declare all the rooms
 rooms = {
@@ -101,7 +120,7 @@ rooms = {
         appears to be a foyer with connected rooms...
         There also appears to be something skittering on the floor.
         """,
-        [broken_chest, torch],
+        [chest, torch],
         []
     ),
 
@@ -111,8 +130,17 @@ rooms = {
         Dim light filters in from the south. Dusty
         passages run north and east.
         """,
-        [broken_chest, rusty_sword],
+        [chest, rusty_sword],
         [small_spider]
+    ),
+
+    'something': Room(
+        "Something",
+        """
+        Something coming soon
+        """,
+        [chest, thousand_gold],
+        [boulder]
     ),
 
     'overlook': Room(
@@ -154,6 +182,8 @@ rooms['outside'].n_to = rooms['foyer']
 rooms['foyer'].s_to = rooms['outside']
 rooms['foyer'].n_to = rooms['overlook']
 rooms['foyer'].e_to = rooms['narrow']
+rooms['foyer'].w_to = rooms['something']
+rooms['something'].e_to = rooms['foyer']
 rooms['overlook'].s_to = rooms['foyer']
 rooms['narrow'].w_to = rooms['foyer']
 rooms['narrow'].n_to = rooms['treasure']
@@ -161,7 +191,7 @@ rooms['treasure'].s_to = rooms['narrow']
 #initial room
 room = rooms['outside']
 
-#
+
 # Main
 #
 
@@ -176,10 +206,15 @@ def clear():
         system("clear")
     
 # Make a new player object that is currently in the 'outside' room.
+clear()
+merchant = Merchant(rooms['outside'], "there's a merchant here. Try trade merchant.")
+rooms['outside'].monsters.append(merchant)
+monsters.append(merchant)
+
 i = input("Welcome to Cavern of Marvelous Adventures! Please enter your name:\n")
 player = Player(i, room, 100, 0, 0)
 
-clear()
+
 sys_print(f"Welcome to your doom, {player.name}")
 
 def help():
@@ -446,7 +481,9 @@ def parse(inpt):
         elif inpt == "inventory" or inpt == "i":
             player.list_inventory()
             return
-
+        elif inpt == "trade":
+            if player.current_room.monsters.contains(merchant):
+                merchant.list_inventory()
     sys_print("invalid command")
 
 # Write a loop that:

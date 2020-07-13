@@ -1,6 +1,7 @@
 # Write a class to hold player information, e.g. what room they are in
 # currently.
-from item import Item, Weapon, LightSource
+from item import Item, Weapon, LightSource, Gold
+
 
 # TODO: Monster system
 
@@ -264,3 +265,12 @@ class Monster(Mob):
 
     def __str__(self):
         return f"{self.name} has {self.health} health. {self.name} is worth {self.experience} experience"
+
+
+class Merchant(Player):
+    def __init__(self, current_room, room_description):        
+        super().__init__("merchant", current_room, 10000, 0, 10000000)
+        self.room_description = room_description
+        armor = Item(9999, "armor", "some armor", "", 10)
+        self.inventory = [armor]
+        
