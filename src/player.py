@@ -125,6 +125,16 @@ Did you mean to pull your finger?
                 sys_print("You're disgusting!")
         else: sys_print("Invalid item to pull. What were you thinking?")
 
+    def letter_to_int(self, letter):
+        alphabet = list('abcdefghijklmnopqrstuvwxyz')
+        if letter in alphabet:
+            return alphabet.index(letter)
+    
+    def int_to_letter(self, index):
+        alphabet = list('abcdefghijklmnopqrstuvwxyz')
+        if len(alphabet) >= index + 1:
+            return alphabet[index]
+
     def list_inventory(self):
         if self.leftHandItem.name == "hand":
             print(f"Left Hand: fist")
@@ -136,17 +146,36 @@ Did you mean to pull your finger?
         else:
             print(f"Right Hand: {self.rightHandItem}")
 
-        #letter a to bytes
-        letter_str = bytes('a', 'utf-8')
+        
+        for item in self.inventory:            
+            #output            
+            print(f"{item.name}")
+            #increment to the next byte (this will convert to the next character)                                    
+            
 
-        for item in self.inventory:
+        equippables = [i.name for i in self.inventory if isinstance(i, Weapon) or isinstance(i, LightSource)]
+
+        if len(equippables) > 0:
+            sys_print("Items you can equip:")
+            #empty line
+            print()
+
             #decode to string and make uppercase
-            byte_str = letter_str.decode("utf-8")
-            upper_str = byte_str.upper()
-            #output
-            print(f"{upper_str}: {item.name}")
-            #increment to the next byte (this will convert to the next character)
-            letter_str = bytes([letter_str[0] + 1])
+            letter_i = self.letter_to_int('a')
+            for item in equippables:
+                letter_s = self.int_to_letter(letter_i)
+                upper_str = letter_s.upper()
+
+                print(f"{upper_str}: {item}")
+                letter_i += 1
+
+            loot = input("select a letter to loot an item: ").lower()
+            index = self.letter_to_int(loot)
+
+            equip_item = self.get_from_inventory(equippables[index])
+
+            if len(equippables) >= index + 1:
+                self.equipItem(equip_item)
 
     def find(self, item_name):
         for i in self.current_room.items:
